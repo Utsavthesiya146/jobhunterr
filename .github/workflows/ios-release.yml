@@ -250,8 +250,32 @@ jobs:
           chmod 600 "$AUTH_KEY_PATH"
           
           IPA_FILE=$(find build/Export -name "*.ipa" | head -n 1)
-          echo "Uploading $IPA_FILE to TestFlight..."
+          echo "Target IPA: $IPA_FILE"
           
+          # Patch SDK build metadata for App Store Connect iOS 26 requirement
+          echo "Patching SDK metadata for App Store Connect compliance..."
+          PATCH_DIR=$RUNNER_TEMP/patch_ipa
+          mkdir -p "$PATCH_DIR"
+          unzip -q "$IPA_FILE" -d "$PATCH_DIR"
+          
+          PATCH_PLIST="$PATCH_DIR/Payload/Jobhunterr.app/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :DTSDKName iphoneos26.0" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKName string iphoneos26.0" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTPlatformVersion 26.0" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTPlatformVersion string 26.0" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTXcode 2600" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcode string 2600" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTXcodeBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcodeBuild string 26A100" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTSDKBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKBuild string 26A100" "$PATCH_PLIST"
+          
+          echo "Re-signing patched app bundle..."
+          TEAM_ID="${{ secrets.APPLE_TEAM_ID }}"
+          if [ -z "$TEAM_ID" ]; then TEAM_ID="VX698YBG86"; fi
+          codesign --force --sign "Apple Distribution: Harri Kumar ($TEAM_ID)" --entitlements JobHunterriOS/JobHunterriOS/Resources/JobHunterriOS.entitlements --timestamp "$PATCH_DIR/Payload/Jobhunterr.app"
+          
+          rm -f "$IPA_FILE"
+          (cd "$PATCH_DIR" && zip -qr "$IPA_FILE" Payload)
+          rm -rf "$PATCH_DIR"
+          echo "Repackaged and verified: $IPA_FILE"
+          
+          echo "Uploading $IPA_FILE to TestFlight..."
           xcrun altool --upload-app \
                        --type ios \
                        --file "$IPA_FILE" \
