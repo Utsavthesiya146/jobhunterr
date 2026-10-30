@@ -72,6 +72,7 @@ jobs:
         run: |
           KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
           KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
           
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -82,23 +83,28 @@ jobs:
           CERT_PATH=$RUNNER_TEMP/distribution.p12
           echo -n "${{ secrets.APPLE_CERTIFICATE_BASE64 }}" | base64 --decode -o "$CERT_PATH"
           security import "$CERT_PATH" -P "${{ secrets.APPLE_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           
-          # Add to search list
+          # Set as default and add to keychain search list
+          security default-keychain -s "$KEYCHAIN_PATH"
           security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
           
           # Install Provisioning Profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/JobHunterr_AppStore.mobileprovision
           echo -n "${{ secrets.APP_STORE_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode -o "$PROFILE_PATH"
-          echo "Installed provisioning profile."
+          
+          # Extract UUID and copy profile by UUID as required by Xcode
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/${PROFILE_UUID}.mobileprovision
+          echo "Installed provisioning profile: JobHunterr_AppStore (UUID: $PROFILE_UUID)"
 
       - name: Prepare Export Options Plist
         run: |
           mkdir -p build/Export
           TEAM_ID="${{ secrets.APPLE_TEAM_ID }}"
           if [ -z "$TEAM_ID" ]; then
-            TEAM_ID="PENDING_TEAM_ID"
+            TEAM_ID="VX698YBG86"
           fi
           
           cat <<EOF > build/ExportOptions.plist
@@ -111,7 +117,14 @@ jobs:
               <key>method</key>
               <string>app-store</string>
               <key>signingStyle</key>
-              <string>automatic</string>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.jobhunterr.jobhunterr20</key>
+                  <string>JobHunterr_AppStore</string>
+              </dict>
               <key>stripSwiftSymbols</key>
               <true/>
               <key>teamID</key>
@@ -129,6 +142,10 @@ jobs:
       - name: Build Release Archive
         run: |
           mkdir -p build/Release
+          TEAM_ID="${{ secrets.APPLE_TEAM_ID }}"
+          if [ -z "$TEAM_ID" ]; then
+            TEAM_ID="VX698YBG86"
+          fi
           
           if [ "$ALL_CREDENTIALS_SET" = "true" ]; then
             echo "Building signed Release Archive..."
@@ -137,6 +154,10 @@ jobs:
                        -configuration Release \
                        -destination 'generic/platform=iOS' \
                        -archivePath build/Release/Jobhunterr.xcarchive \
+                       DEVELOPMENT_TEAM="$TEAM_ID" \
+                       CODE_SIGN_STYLE="Manual" \
+                       CODE_SIGN_IDENTITY="Apple Distribution" \
+                       PROVISIONING_PROFILE_SPECIFIER="JobHunterr_AppStore" \
                        archive
           else
             echo "Building unsigned Release Archive..."
@@ -162,6 +183,39 @@ jobs:
           
           echo "IPA export complete:"
           ls -la build/Export/
+
+      - name: Verify Signed IPA Package
+        if: env.ALL_CREDENTIALS_SET == 'true'
+        run: |
+          IPA_FILE=$(find build/Export -name "*.ipa" | head -n 1)
+          if [ -z "$IPA_FILE" ]; then
+            echo "::error ::No IPA file found in build/Export!"
+            exit 1
+          fi
+          echo "========================================================"
+          echo "Verifying Signed IPA: $IPA_FILE"
+          echo "========================================================"
+          
+          UNZIP_DIR=$RUNNER_TEMP/ipa_inspect
+          mkdir -p "$UNZIP_DIR"
+          unzip -q "$IPA_FILE" -d "$UNZIP_DIR"
+          
+          APP_PATH=$(find "$UNZIP_DIR/Payload" -name "*.app" -maxdepth 1)
+          echo "App Bundle: $APP_PATH"
+          
+          echo "--- Code Signature Verification ---"
+          codesign -dv --verbose=4 "$APP_PATH"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          
+          echo "--- Embedded Provisioning Profile Details ---"
+          security cms -D -i "$APP_PATH/embedded.mobileprovision" > "$UNZIP_DIR/profile.plist"
+          /usr/libexec/PlistBuddy -c "Print :Name" "$UNZIP_DIR/profile.plist"
+          /usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" "$UNZIP_DIR/profile.plist"
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" "$UNZIP_DIR/profile.plist"
+          /usr/libexec/PlistBuddy -c "Print :ExpirationDate" "$UNZIP_DIR/profile.plist"
+          
+          rm -rf "$UNZIP_DIR"
+          echo "Signature verification completed successfully."
 
       - name: Upload Release Archive Artifact
         uses: actions/upload-artifact@v4
