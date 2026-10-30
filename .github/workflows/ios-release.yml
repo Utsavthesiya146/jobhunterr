@@ -36,24 +36,35 @@ jobs:
 
       - name: Validate Apple Credentials Availability
         id: check-secrets
+        env:
+          CERT_SECRET: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          PASS_SECRET: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE_SECRET: ${{ secrets.APP_STORE_PROVISIONING_PROFILE_BASE64 }}
+          TEAM_SECRET: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_SECRET: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 || secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          ASC_KEY_ID_SECRET: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_SECRET: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
-          HAS_CERT="${{ secrets.APPLE_CERTIFICATE_BASE64 != '' }}"
-          HAS_PASS="${{ secrets.APPLE_CERTIFICATE_PASSWORD != '' }}"
-          HAS_PROFILE="${{ secrets.APP_STORE_PROVISIONING_PROFILE_BASE64 != '' }}"
-          HAS_TEAM="${{ secrets.APPLE_TEAM_ID != '' }}"
-          
-          if [ "$HAS_CERT" = "true" ] && [ "$HAS_PASS" = "true" ] && [ "$HAS_PROFILE" = "true" ] && [ "$HAS_TEAM" = "true" ]; then
+          if [ -n "$CERT_SECRET" ] && [ -n "$PASS_SECRET" ] && [ -n "$PROFILE_SECRET" ] && [ -n "$TEAM_SECRET" ]; then
             echo "ALL_CREDENTIALS_SET=true" >> $GITHUB_ENV
-            echo "Apple Developer credentials found in repository secrets."
+            echo "Apple Developer signing credentials detected in repository secrets."
           else
             echo "ALL_CREDENTIALS_SET=false" >> $GITHUB_ENV
             echo "::warning ::Apple Developer credentials are not yet configured in GitHub Secrets."
-            echo "Required Secrets:"
+            echo "Required Signing Secrets:"
             echo "  - APPLE_CERTIFICATE_BASE64"
             echo "  - APPLE_CERTIFICATE_PASSWORD"
             echo "  - APP_STORE_PROVISIONING_PROFILE_BASE64"
             echo "  - APPLE_TEAM_ID"
             echo "Proceeding with unsigned archive verification..."
+          fi
+
+          if [ -n "$ASC_KEY_SECRET" ] && [ -n "$ASC_KEY_ID_SECRET" ] && [ -n "$ASC_ISSUER_SECRET" ]; then
+            echo "HAS_ASC_KEY=true" >> $GITHUB_ENV
+            echo "App Store Connect API credentials detected."
+          else
+            echo "HAS_ASC_KEY=false" >> $GITHUB_ENV
+            echo "App Store Connect API credentials not found or incomplete."
           fi
 
       - name: Setup Temporary Keychain and Install Signing Assets
@@ -124,6 +135,7 @@ jobs:
             xcodebuild -project JobHunterriOS/JobHunterriOS.xcodeproj \
                        -scheme JobHunterr \
                        -configuration Release \
+                       -destination 'generic/platform=iOS' \
                        -archivePath build/Release/Jobhunterr.xcarchive \
                        archive
           else
@@ -131,6 +143,7 @@ jobs:
             xcodebuild -project JobHunterriOS/JobHunterriOS.xcodeproj \
                        -scheme JobHunterr \
                        -configuration Release \
+                       -destination 'generic/platform=iOS' \
                        -archivePath build/Release/Jobhunterr.xcarchive \
                        CODE_SIGNING_ALLOWED=NO \
                        CODE_SIGNING_REQUIRED=NO \
@@ -166,19 +179,23 @@ jobs:
           retention-days: 30
 
       - name: Upload to TestFlight (Optional / Authorized)
-        if: env.ALL_CREDENTIALS_SET == 'true' && github.event.inputs.upload_to_testflight == 'true' && secrets.APP_STORE_CONNECT_API_KEY_BASE64 != ''
+        if: env.ALL_CREDENTIALS_SET == 'true' && github.event.inputs.upload_to_testflight == 'true' && env.HAS_ASC_KEY == 'true'
+        env:
+          ASC_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 || secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
           echo "Preparing App Store Connect API Key..."
           mkdir -p ~/.appstoreconnect/private_keys
-          echo -n "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode -o ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+          echo -n "$ASC_PRIVATE_KEY" | base64 --decode -o ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
           
           IPA_FILE=$(find build/Export -name "*.ipa" | head -n 1)
           echo "Uploading $IPA_FILE to TestFlight..."
           xcrun altool --upload-app \
                        --type ios \
                        --file "$IPA_FILE" \
-                       --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
-                       --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
+                       --apiKey "$ASC_KEY_ID" \
+                       --apiIssuer "$ASC_ISSUER"
 
       - name: Clean Temporary Keychain and Credentials
         if: always()
