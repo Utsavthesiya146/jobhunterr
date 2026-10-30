@@ -249,7 +249,7 @@ jobs:
           echo -n "$ASC_PRIVATE_KEY" | base64 --decode -o "$AUTH_KEY_PATH"
           chmod 600 "$AUTH_KEY_PATH"
           
-          IPA_FILE=$(find build/Export -name "*.ipa" | head -n 1)
+          IPA_FILE=$(find "$GITHUB_WORKSPACE/build/Export" -name "*.ipa" | head -n 1)
           echo "Target IPA: $IPA_FILE"
           
           # Patch SDK build metadata for App Store Connect iOS 26 requirement
