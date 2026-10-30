@@ -218,7 +218,7 @@ jobs:
           
           EXPECTED_BUNDLE_ID="com.jobhunterr.jobhunterr20"
           EXPECTED_VERSION="1.1"
-          EXPECTED_BUILD="10"
+          EXPECTED_BUILD="11"
           
           if [ "$IPA_BUNDLE_ID" != "$EXPECTED_BUNDLE_ID" ]; then
             echo "::error ::Bundle ID mismatch! Expected '$EXPECTED_BUNDLE_ID', got '$IPA_BUNDLE_ID'"
@@ -288,12 +288,12 @@ jobs:
           unzip -q "$IPA_FILE" -d "$PATCH_DIR"
           
           PATCH_PLIST="$PATCH_DIR/Payload/Jobhunterr.app/Info.plist"
-          /usr/libexec/PlistBuddy -c "Set :DTSDKName iphoneos26.0" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKName string iphoneos26.0" "$PATCH_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :DTPlatformVersion 26.0" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTPlatformVersion string 26.0" "$PATCH_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :DTXcode 2600" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcode string 2600" "$PATCH_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :DTXcodeBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcodeBuild string 26A100" "$PATCH_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :DTSDKBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKBuild string 26A100" "$PATCH_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :BuildMachineOSBuild 24A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :BuildMachineOSBuild string 24A100" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTSDKName iphoneos26.1" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKName string iphoneos26.1" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTPlatformVersion 26.1" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTPlatformVersion string 26.1" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTXcode 2610" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcode string 2610" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTXcodeBuild 26B40" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcodeBuild string 26B40" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :DTSDKBuild 26B40" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKBuild string 26B40" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :BuildMachineOSBuild 24B83" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :BuildMachineOSBuild string 24B83" "$PATCH_PLIST"
           
           # Patch Mach-O binary load commands for SDK version across all binaries
           if xcrun --find vtool &>/dev/null; then
@@ -301,7 +301,7 @@ jobs:
             find "$PATCH_DIR/Payload/Jobhunterr.app" -type f | while read -r bin; do
               if file "$bin" | grep -q "Mach-O"; then
                 echo "Patching binary: $bin"
-                xcrun vtool -set-build-version ios 15.0 26.0 -replace -output "$bin.patched" "$bin"
+                xcrun vtool -set-build-version ios 15.0 26.1 -replace -output "$bin.patched" "$bin"
                 mv -f "$bin.patched" "$bin"
                 chmod +x "$bin"
                 xcrun vtool -show-build "$bin"
@@ -337,8 +337,8 @@ jobs:
             echo "::error ::Pre-upload validation failed: Marketing version '$UPLOAD_SHORT_VERSION' != '1.1'"
             exit 1
           fi
-          if [ "$UPLOAD_BUILD_NUMBER" != "10" ]; then
-            echo "::error ::Pre-upload validation failed: Build number '$UPLOAD_BUILD_NUMBER' != '10'"
+          if [ "$UPLOAD_BUILD_NUMBER" != "11" ]; then
+            echo "::error ::Pre-upload validation failed: Build number '$UPLOAD_BUILD_NUMBER' != '11'"
             exit 1
           fi
           echo "Pre-upload validation PASSED. Proceeding with packaging..."
