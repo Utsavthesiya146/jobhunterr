@@ -1,0 +1,132 @@
+name: iOS Simulator Build & Smoke Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'JobHunterriOS/**'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'JobHunterriOS/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Smoke Test (macOS)
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: |
+          echo "========================================================"
+          echo "Inspecting installed Xcode installations..."
+          echo "========================================================"
+          ls -d /Applications/Xcode* || true
+          
+          if [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          elif [ -d "/Applications/Xcode_15.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.4.app
+          elif [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          
+          echo "Selected Xcode: $(xcode-select -p)"
+          xcodebuild -version
+          swift --version
+
+      - name: Verify Project and Schemes
+        run: |
+          echo "Listing project schemes and targets:"
+          xcodebuild -list -project JobHunterriOS/JobHunterriOS.xcodeproj
+
+      - name: Build for iOS Simulator
+        run: |
+          echo "========================================================"
+          echo "Compiling Job Hunterr for iOS Simulator..."
+          echo "========================================================"
+          xcodebuild -project JobHunterriOS/JobHunterriOS.xcodeproj \
+                     -scheme JobHunterr \
+                     -configuration Debug \
+                     -destination 'generic/platform=iOS Simulator' \
+                     -derivedDataPath build/DerivedData \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGN_IDENTITY="" \
+                     clean build
+
+      - name: Run Automated Simulator Smoke Test
+        run: |
+          echo "========================================================"
+          echo "Starting iOS Simulator Smoke Test..."
+          echo "========================================================"
+          
+          APP_PATH=$(find build/DerivedData -name "Jobhunterr.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: Jobhunterr.app not found in build directory!"
+            exit 1
+          fi
+          echo "Found compiled app at: $APP_PATH"
+
+          mkdir -p test-diagnostics
+
+          # Find available iPhone simulator device
+          DEVICE_ID=$(xcrun simctl list devices available | grep -E "iPhone (16|15|14)" | head -n 1 | sed -E 's/.*\(([-0-9A-F]+)\).*/\1/')
+          if [ -z "$DEVICE_ID" ]; then
+            DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -n 1 | sed -E 's/.*\(([-0-9A-F]+)\).*/\1/')
+          fi
+          echo "Selected Simulator Device ID: $DEVICE_ID"
+
+          # Boot the simulator
+          xcrun simctl boot "$DEVICE_ID" || true
+
+          # Install the application
+          echo "Installing application..."
+          xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+
+          # Launch the application
+          BUNDLE_ID="com.jobhunterr.jobhunterr20"
+          echo "Launching $BUNDLE_ID..."
+          LAUNCH_OUTPUT=$(xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID")
+          echo "Launch response: $LAUNCH_OUTPUT"
+
+          # Give the WebView time to initialize and render
+          sleep 6
+
+          # Capture diagnostic screenshot
+          xcrun simctl io "$DEVICE_ID" screenshot test-diagnostics/simulator_launch_smoke_test.png || true
+          echo "Captured diagnostic screenshot."
+
+          # Clean up
+          xcrun simctl terminate "$DEVICE_ID" "$BUNDLE_ID" || true
+          xcrun simctl shutdown "$DEVICE_ID" || true
+
+          echo "========================================================"
+          echo "Simulator Smoke Test Completed Successfully!"
+          echo "========================================================"
+
+      - name: Upload Compiled App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jobhunterr-Simulator-App
+          path: build/DerivedData/Build/Products/Debug-iphonesimulator/Jobhunterr.app
+          retention-days: 14
+
+      - name: Upload Test Diagnostics & Screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Simulator-Smoke-Test-Diagnostics
+          path: test-diagnostics/
+          retention-days: 14

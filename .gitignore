@@ -1,0 +1,67 @@
+# ==============================================================================
+# Job Hunterr - Repository Root .gitignore
+# ==============================================================================
+
+# OS & Environment
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Build artifacts & Temporary Archives
+*.tmp
+*.log
+JobHunterr_iOS_Source.zip
+
+# ==============================================================================
+# iOS / Xcode
+# ==============================================================================
+build/
+DerivedData/
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+*.xcuserdatad
+xcuserdata/
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods & Carthage (if generated)
+Pods/
+Carthage/Build/
+
+# Fastlane (if added)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# ==============================================================================
+# Android / Gradle
+# ==============================================================================
+.gradle/
+**/build/
+*.apk
+*.aab
+local.properties
+.idea/
+*.iml
+.navigation/
+captures/
+output-metadata.json
+baselineProfiles/
+
+# Security & Private Keys (Never Commit!)
+*.jks
+*.keystore
+*.p12
+*.cer
+*.mobileprovision
+*.key
+*.pem
+*.p8

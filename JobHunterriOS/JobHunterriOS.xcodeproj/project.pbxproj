@@ -1,0 +1,385 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		JH0000BUILDFIL0000000001 /* JobHunterrApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000001 /* JobHunterrApp.swift */; };
+		JH0000BUILDFIL0000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000002 /* AppDelegate.swift */; };
+		JH0000BUILDFIL0000000003 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000003 /* AppConfiguration.swift */; };
+		JH0000BUILDFIL0000000004 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000004 /* Theme.swift */; };
+		JH0000BUILDFIL0000000005 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000005 /* NetworkMonitor.swift */; };
+		JH0000BUILDFIL0000000006 /* SessionCookieManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000006 /* SessionCookieManager.swift */; };
+		JH0000BUILDFIL0000000007 /* LoadingProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000007 /* LoadingProgressBar.swift */; };
+		JH0000BUILDFIL0000000008 /* OfflineErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000008 /* OfflineErrorView.swift */; };
+		JH0000BUILDFIL0000000009 /* JobHunterrWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000009 /* JobHunterrWebViewController.swift */; };
+		JH0000BUILDFIL0000000010 /* JobHunterrWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000010 /* JobHunterrWebView.swift */; };
+		JH0000BUILDFIL0000000011 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000011 /* MainContentView.swift */; };
+		JH0000BUILDFIL0000000012 /* FileDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000012 /* FileDownloadManager.swift */; };
+		JH0000BUILDFIL0000000013 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000013 /* NotificationService.swift */; };
+		JH0000BUILDFIL0000000014 /* NativeShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000014 /* NativeShareManager.swift */; };
+		JH0000BUILDFIL0000000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000015 /* Assets.xcassets */; };
+		JH0000BUILDFIL0000000016 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000016 /* LaunchScreen.storyboard */; };
+		JH0000BUILDFIL0000000017 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = JH0000FILEREF0000000017 /* PrivacyInfo.xcprivacy */; };
+		JH0000BUILDFILFRM0000001 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = JH0000FILEREFFRM0000001 /* WebKit.framework */; };
+		JH0000BUILDFILFRM0000002 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = JH0000FILEREFFRM0000002 /* SafariServices.framework */; };
+		JH0000BUILDFILFRM0000003 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = JH0000FILEREFFRM0000003 /* UserNotifications.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		JH0000FILEREFPROD000001 /* Jobhunterr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jobhunterr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		JH0000FILEREF0000000001 /* JobHunterrApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobHunterrApp.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000003 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000004 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000005 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000006 /* SessionCookieManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCookieManager.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000007 /* LoadingProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingProgressBar.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000008 /* OfflineErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineErrorView.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000009 /* JobHunterrWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobHunterrWebViewController.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000010 /* JobHunterrWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobHunterrWebView.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000011 /* MainContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainContentView.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000012 /* FileDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloadManager.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000013 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000014 /* NativeShareManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeShareManager.swift; sourceTree = "<group>"; };
+		JH0000FILEREF0000000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		JH0000FILEREF0000000016 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		JH0000FILEREF0000000017 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		JH0000FILEREF0000000018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		JH0000FILEREF0000000019 /* JobHunterriOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JobHunterriOS.entitlements; sourceTree = "<group>"; };
+		JH0000FILEREFFRM0000001 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		JH0000FILEREFFRM0000002 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		JH0000FILEREFFRM0000003 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		JH0000PHASEFRM00000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				JH0000BUILDFILFRM0000001 /* WebKit.framework in Frameworks */,
+				JH0000BUILDFILFRM0000002 /* SafariServices.framework in Frameworks */,
+				JH0000BUILDFILFRM0000003 /* UserNotifications.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		JH0000GROUP00000000001 = {
+			isa = PBXGroup;
+			children = (
+				JH0000GROUPAPP00000001 /* App */,
+				JH0000GROUPCORE0000001 /* Core */,
+				JH0000GROUPVIEWS000001 /* Views */,
+				JH0000GROUPSERV0000001 /* Services */,
+				JH0000GROUPRES00000001 /* Resources */,
+				JH0000GROUPFRAME000001 /* Frameworks */,
+				JH0000GROUPPROD0000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		JH0000GROUPAPP00000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREF0000000001 /* JobHunterrApp.swift */,
+				JH0000FILEREF0000000002 /* AppDelegate.swift */,
+			);
+			path = JobHunterriOS/App;
+			sourceTree = "<group>";
+		};
+		JH0000GROUPCORE0000001 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREF0000000003 /* AppConfiguration.swift */,
+				JH0000FILEREF0000000004 /* Theme.swift */,
+				JH0000FILEREF0000000005 /* NetworkMonitor.swift */,
+				JH0000FILEREF0000000006 /* SessionCookieManager.swift */,
+			);
+			path = JobHunterriOS/Core;
+			sourceTree = "<group>";
+		};
+		JH0000GROUPVIEWS000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREF0000000007 /* LoadingProgressBar.swift */,
+				JH0000FILEREF0000000008 /* OfflineErrorView.swift */,
+				JH0000FILEREF0000000009 /* JobHunterrWebViewController.swift */,
+				JH0000FILEREF0000000010 /* JobHunterrWebView.swift */,
+				JH0000FILEREF0000000011 /* MainContentView.swift */,
+			);
+			path = JobHunterriOS/Views;
+			sourceTree = "<group>";
+		};
+		JH0000GROUPSERV0000001 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREF0000000012 /* FileDownloadManager.swift */,
+				JH0000FILEREF0000000013 /* NotificationService.swift */,
+				JH0000FILEREF0000000014 /* NativeShareManager.swift */,
+			);
+			path = JobHunterriOS/Services;
+			sourceTree = "<group>";
+		};
+		JH0000GROUPRES00000001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREF0000000018 /* Info.plist */,
+				JH0000FILEREF0000000019 /* JobHunterriOS.entitlements */,
+				JH0000FILEREF0000000017 /* PrivacyInfo.xcprivacy */,
+				JH0000FILEREF0000000016 /* LaunchScreen.storyboard */,
+				JH0000FILEREF0000000015 /* Assets.xcassets */,
+			);
+			path = JobHunterriOS/Resources;
+			sourceTree = "<group>";
+		};
+		JH0000GROUPFRAME000001 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREFFRM0000001 /* WebKit.framework */,
+				JH0000FILEREFFRM0000002 /* SafariServices.framework */,
+				JH0000FILEREFFRM0000003 /* UserNotifications.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		JH0000GROUPPROD0000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				JH0000FILEREFPROD000001 /* Jobhunterr.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		JH0001TARGET00000000001 /* JobHunterriOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = JH0000CFGLISTTGT000001 /* Build configuration list for PBXNativeTarget "JobHunterriOS" */;
+			buildPhases = (
+				JH0000PHASESRC00000001 /* Sources */,
+				JH0000PHASEFRM00000001 /* Frameworks */,
+				JH0000PHASERES00000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JobHunterriOS;
+			productName = Jobhunterr;
+			productReference = JH0000FILEREFPROD000001 /* Jobhunterr.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		JH0000PROJECT0000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					JH0001TARGET00000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = JH0000CFGLISTPRJ000001 /* Build configuration list for PBXProject "JobHunterriOS" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = JH0000GROUP00000000001;
+			productRefGroup = JH0000GROUPPROD0000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				JH0001TARGET00000000001 /* JobHunterriOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		JH0000PHASERES00000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				JH0000BUILDFIL0000000015 /* Assets.xcassets in Resources */,
+				JH0000BUILDFIL0000000016 /* LaunchScreen.storyboard in Resources */,
+				JH0000BUILDFIL0000000017 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		JH0000PHASESRC00000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				JH0000BUILDFIL0000000001 /* JobHunterrApp.swift in Sources */,
+				JH0000BUILDFIL0000000002 /* AppDelegate.swift in Sources */,
+				JH0000BUILDFIL0000000003 /* AppConfiguration.swift in Sources */,
+				JH0000BUILDFIL0000000004 /* Theme.swift in Sources */,
+				JH0000BUILDFIL0000000005 /* NetworkMonitor.swift in Sources */,
+				JH0000BUILDFIL0000000006 /* SessionCookieManager.swift in Sources */,
+				JH0000BUILDFIL0000000007 /* LoadingProgressBar.swift in Sources */,
+				JH0000BUILDFIL0000000008 /* OfflineErrorView.swift in Sources */,
+				JH0000BUILDFIL0000000009 /* JobHunterrWebViewController.swift in Sources */,
+				JH0000BUILDFIL0000000010 /* JobHunterrWebView.swift in Sources */,
+				JH0000BUILDFIL0000000011 /* MainContentView.swift in Sources */,
+				JH0000BUILDFIL0000000012 /* FileDownloadManager.swift in Sources */,
+				JH0000BUILDFIL0000000013 /* NotificationService.swift in Sources */,
+				JH0000BUILDFIL0000000014 /* NativeShareManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		JH0000CFGPRJDBG0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDEFINED_VARIABLES = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		JH0000CFGPRJREL0000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDEFINED_VARIABLES = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		JH0000CFGTGTDBG0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = JobHunterriOS/Resources/JobHunterriOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = JobHunterriOS/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jobhunterr.jobhunterr20;
+				PRODUCT_NAME = Jobhunterr;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		JH0000CFGTGTREL0000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = JobHunterriOS/Resources/JobHunterriOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = JobHunterriOS/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jobhunterr.jobhunterr20;
+				PRODUCT_NAME = Jobhunterr;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		JH0000CFGLISTPRJ000001 /* Build configuration list for PBXProject "JobHunterriOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				JH0000CFGPRJDBG0000001 /* Debug */,
+				JH0000CFGPRJREL0000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		JH0000CFGLISTTGT000001 /* Build configuration list for PBXNativeTarget "JobHunterriOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				JH0000CFGTGTDBG0000001 /* Debug */,
+				JH0000CFGTGTREL0000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = JH0000PROJECT0000000001 /* Project object */;
+}

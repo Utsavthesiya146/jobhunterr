@@ -1,0 +1,191 @@
+name: iOS Signed Release & TestFlight Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_testflight:
+        description: 'Upload directly to TestFlight after successful build'
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-signed-ipa:
+    name: Build Signed Release IPA
+    runs-on: macos-14
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: |
+          if [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          elif [ -d "/Applications/Xcode_15.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.4.app
+          elif [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          xcodebuild -version
+
+      - name: Validate Apple Credentials Availability
+        id: check-secrets
+        run: |
+          HAS_CERT="${{ secrets.APPLE_CERTIFICATE_BASE64 != '' }}"
+          HAS_PASS="${{ secrets.APPLE_CERTIFICATE_PASSWORD != '' }}"
+          HAS_PROFILE="${{ secrets.APP_STORE_PROVISIONING_PROFILE_BASE64 != '' }}"
+          HAS_TEAM="${{ secrets.APPLE_TEAM_ID != '' }}"
+          
+          if [ "$HAS_CERT" = "true" ] && [ "$HAS_PASS" = "true" ] && [ "$HAS_PROFILE" = "true" ] && [ "$HAS_TEAM" = "true" ]; then
+            echo "ALL_CREDENTIALS_SET=true" >> $GITHUB_ENV
+            echo "Apple Developer credentials found in repository secrets."
+          else
+            echo "ALL_CREDENTIALS_SET=false" >> $GITHUB_ENV
+            echo "::warning ::Apple Developer credentials are not yet configured in GitHub Secrets."
+            echo "Required Secrets:"
+            echo "  - APPLE_CERTIFICATE_BASE64"
+            echo "  - APPLE_CERTIFICATE_PASSWORD"
+            echo "  - APP_STORE_PROVISIONING_PROFILE_BASE64"
+            echo "  - APPLE_TEAM_ID"
+            echo "Proceeding with unsigned archive verification..."
+          fi
+
+      - name: Setup Temporary Keychain and Install Signing Assets
+        if: env.ALL_CREDENTIALS_SET == 'true'
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Import Distribution Certificate
+          CERT_PATH=$RUNNER_TEMP/distribution.p12
+          echo -n "${{ secrets.APPLE_CERTIFICATE_BASE64 }}" | base64 --decode -o "$CERT_PATH"
+          security import "$CERT_PATH" -P "${{ secrets.APPLE_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Add to search list
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+          
+          # Install Provisioning Profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/JobHunterr_AppStore.mobileprovision
+          echo -n "${{ secrets.APP_STORE_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode -o "$PROFILE_PATH"
+          echo "Installed provisioning profile."
+
+      - name: Prepare Export Options Plist
+        run: |
+          mkdir -p build/Export
+          TEAM_ID="${{ secrets.APPLE_TEAM_ID }}"
+          if [ -z "$TEAM_ID" ]; then
+            TEAM_ID="PENDING_TEAM_ID"
+          fi
+          
+          cat <<EOF > build/ExportOptions.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>destination</key>
+              <string>export</string>
+              <key>method</key>
+              <string>app-store</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>manageAppVersionAndBuildNumber</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Build Release Archive
+        run: |
+          mkdir -p build/Release
+          
+          if [ "$ALL_CREDENTIALS_SET" = "true" ]; then
+            echo "Building signed Release Archive..."
+            xcodebuild -project JobHunterriOS/JobHunterriOS.xcodeproj \
+                       -scheme JobHunterr \
+                       -configuration Release \
+                       -archivePath build/Release/Jobhunterr.xcarchive \
+                       archive
+          else
+            echo "Building unsigned Release Archive..."
+            xcodebuild -project JobHunterriOS/JobHunterriOS.xcodeproj \
+                       -scheme JobHunterr \
+                       -configuration Release \
+                       -archivePath build/Release/Jobhunterr.xcarchive \
+                       CODE_SIGNING_ALLOWED=NO \
+                       CODE_SIGNING_REQUIRED=NO \
+                       CODE_SIGN_IDENTITY="" \
+                       archive
+          fi
+
+      - name: Export Signed IPA Package
+        if: env.ALL_CREDENTIALS_SET == 'true'
+        run: |
+          echo "Exporting IPA package..."
+          xcodebuild -exportArchive \
+                     -archivePath build/Release/Jobhunterr.xcarchive \
+                     -exportPath build/Export \
+                     -exportOptionsPlist build/ExportOptions.plist
+          
+          echo "IPA export complete:"
+          ls -la build/Export/
+
+      - name: Upload Release Archive Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jobhunterr-Release-Archive
+          path: build/Release/Jobhunterr.xcarchive
+          retention-days: 14
+
+      - name: Upload Signed IPA Artifact
+        if: env.ALL_CREDENTIALS_SET == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jobhunterr-Production-IPA
+          path: build/Export/*.ipa
+          retention-days: 30
+
+      - name: Upload to TestFlight (Optional / Authorized)
+        if: env.ALL_CREDENTIALS_SET == 'true' && github.event.inputs.upload_to_testflight == 'true' && secrets.APP_STORE_CONNECT_API_KEY_BASE64 != ''
+        run: |
+          echo "Preparing App Store Connect API Key..."
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo -n "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 --decode -o ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+          
+          IPA_FILE=$(find build/Export -name "*.ipa" | head -n 1)
+          echo "Uploading $IPA_FILE to TestFlight..."
+          xcrun altool --upload-app \
+                       --type ios \
+                       --file "$IPA_FILE" \
+                       --apiKey "${{ secrets.APP_STORE_CONNECT_KEY_ID }}" \
+                       --apiIssuer "${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}"
+
+      - name: Clean Temporary Keychain and Credentials
+        if: always()
+        run: |
+          if [ -n "$KEYCHAIN_PATH" ] && [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+          rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/JobHunterr_AppStore.mobileprovision || true
+          rm -rf ~/.appstoreconnect/private_keys || true
+          echo "Temporary credentials wiped."

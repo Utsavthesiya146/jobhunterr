@@ -1,0 +1,26 @@
+# Podfile for Job Hunterr iOS
+# Minimum iOS Deployment Target: 15.0
+platform :ios, '15.0'
+
+use_frameworks!
+
+target 'JobHunterriOS' do
+  # The application uses pure native Apple frameworks:
+  # - WebKit (WKWebView)
+  # - Network (NWPathMonitor)
+  # - UserNotifications (APNs & local alerts)
+  # - SafariServices (SFSafariViewController)
+  # - SwiftUI & UIKit
+  #
+  # Additional third-party pods (e.g. FirebaseAnalytics, GoogleSignIn) can be added below if needed:
+  # pod 'Firebase/Analytics'
+  # pod 'Firebase/Crashlytics'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+    end
+  end
+end
