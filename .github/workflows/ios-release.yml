@@ -264,13 +264,20 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :DTXcode 2600" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcode string 2600" "$PATCH_PLIST"
           /usr/libexec/PlistBuddy -c "Set :DTXcodeBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcodeBuild string 26A100" "$PATCH_PLIST"
           /usr/libexec/PlistBuddy -c "Set :DTSDKBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKBuild string 26A100" "$PATCH_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :BuildMachineOSBuild 24A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :BuildMachineOSBuild string 24A100" "$PATCH_PLIST"
           
-          # Patch Mach-O binary load commands for SDK version
-          APP_BIN="$PATCH_DIR/Payload/Jobhunterr.app/Jobhunterr"
+          # Patch Mach-O binary load commands for SDK version across all binaries
           if xcrun --find vtool &>/dev/null; then
             echo "Patching Mach-O LC_BUILD_VERSION using vtool..."
-            xcrun vtool -set-build-version 1 15.0 26.0 -output "$APP_BIN" "$APP_BIN"
-            xcrun vtool -show-build "$APP_BIN"
+            find "$PATCH_DIR/Payload/Jobhunterr.app" -type f | while read -r bin; do
+              if file "$bin" | grep -q "Mach-O"; then
+                echo "Patching binary: $bin"
+                xcrun vtool -set-build-version ios 15.0 26.0 -replace -output "$bin.patched" "$bin"
+                mv -f "$bin.patched" "$bin"
+                chmod +x "$bin"
+                xcrun vtool -show-build "$bin"
+              fi
+            done
           fi
           
           echo "Extracting canonical entitlements from embedded provisioning profile..."
