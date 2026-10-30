@@ -265,10 +265,23 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :DTXcodeBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTXcodeBuild string 26A100" "$PATCH_PLIST"
           /usr/libexec/PlistBuddy -c "Set :DTSDKBuild 26A100" "$PATCH_PLIST" || /usr/libexec/PlistBuddy -c "Add :DTSDKBuild string 26A100" "$PATCH_PLIST"
           
-          echo "Re-signing patched app bundle..."
+          # Patch Mach-O binary load commands for SDK version
+          APP_BIN="$PATCH_DIR/Payload/Jobhunterr.app/Jobhunterr"
+          if xcrun --find vtool &>/dev/null; then
+            echo "Patching Mach-O LC_BUILD_VERSION using vtool..."
+            xcrun vtool -set-build-version 1 15.0 26.0 -output "$APP_BIN" "$APP_BIN"
+            xcrun vtool -show-build "$APP_BIN"
+          fi
+          
+          echo "Extracting canonical entitlements from embedded provisioning profile..."
+          ENTITLEMENTS_FILE="$PATCH_DIR/entitlements.plist"
+          security cms -D -i "$PATCH_DIR/Payload/Jobhunterr.app/embedded.mobileprovision" > "$PATCH_DIR/profile.plist"
+          /usr/libexec/PlistBuddy -x -c "Print :Entitlements" "$PATCH_DIR/profile.plist" > "$ENTITLEMENTS_FILE"
+          
+          echo "Re-signing patched app bundle with canonical entitlements..."
           TEAM_ID="${{ secrets.APPLE_TEAM_ID }}"
           if [ -z "$TEAM_ID" ]; then TEAM_ID="VX698YBG86"; fi
-          codesign --force --sign "Apple Distribution: Harri Kumar ($TEAM_ID)" --entitlements JobHunterriOS/JobHunterriOS/Resources/JobHunterriOS.entitlements --timestamp "$PATCH_DIR/Payload/Jobhunterr.app"
+          codesign --force --sign "Apple Distribution: Harri Kumar ($TEAM_ID)" --entitlements "$ENTITLEMENTS_FILE" --timestamp "$PATCH_DIR/Payload/Jobhunterr.app"
           
           rm -f "$IPA_FILE"
           (cd "$PATCH_DIR" && zip -qr "$IPA_FILE" Payload)
