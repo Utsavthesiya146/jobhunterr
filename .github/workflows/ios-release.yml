@@ -207,6 +207,35 @@ jobs:
           APP_PATH=$(find "$UNZIP_DIR/Payload" -name "*.app" -maxdepth 1)
           echo "App Bundle: $APP_PATH"
           
+          echo "--- Bundle Metadata Verification ---"
+          IPA_BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_PATH/Info.plist")
+          IPA_SHORT_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_PATH/Info.plist")
+          IPA_BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PATH/Info.plist")
+          
+          echo "  CFBundleIdentifier:         $IPA_BUNDLE_ID"
+          echo "  CFBundleShortVersionString: $IPA_SHORT_VERSION"
+          echo "  CFBundleVersion:            $IPA_BUILD_NUMBER"
+          
+          EXPECTED_BUNDLE_ID="com.jobhunterr.jobhunterr20"
+          EXPECTED_VERSION="1.1"
+          EXPECTED_BUILD="10"
+          
+          if [ "$IPA_BUNDLE_ID" != "$EXPECTED_BUNDLE_ID" ]; then
+            echo "::error ::Bundle ID mismatch! Expected '$EXPECTED_BUNDLE_ID', got '$IPA_BUNDLE_ID'"
+            exit 1
+          fi
+          
+          if [ "$IPA_SHORT_VERSION" != "$EXPECTED_VERSION" ]; then
+            echo "::error ::Marketing version mismatch! Expected '$EXPECTED_VERSION', got '$IPA_SHORT_VERSION'"
+            exit 1
+          fi
+          
+          if [ "$IPA_BUILD_NUMBER" != "$EXPECTED_BUILD" ]; then
+            echo "::error ::Build number mismatch! Expected '$EXPECTED_BUILD', got '$IPA_BUILD_NUMBER'"
+            exit 1
+          fi
+          echo "Mandatory metadata verification PASSED: $IPA_BUNDLE_ID ($IPA_SHORT_VERSION, Build $IPA_BUILD_NUMBER)"
+          
           echo "--- Code Signature Verification ---"
           codesign -dv --verbose=4 "$APP_PATH"
           codesign --verify --deep --strict --verbose=2 "$APP_PATH"
@@ -289,6 +318,30 @@ jobs:
           TEAM_ID="${{ secrets.APPLE_TEAM_ID }}"
           if [ -z "$TEAM_ID" ]; then TEAM_ID="VX698YBG86"; fi
           codesign --force --sign "Apple Distribution: Harri Kumar ($TEAM_ID)" --entitlements "$ENTITLEMENTS_FILE" --timestamp "$PATCH_DIR/Payload/Jobhunterr.app"
+          
+          echo "--- Mandatory Pre-Upload Verification ---"
+          VERIFY_PLIST="$PATCH_DIR/Payload/Jobhunterr.app/Info.plist"
+          UPLOAD_BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$VERIFY_PLIST")
+          UPLOAD_SHORT_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$VERIFY_PLIST")
+          UPLOAD_BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$VERIFY_PLIST")
+          
+          echo "  Upload Bundle ID:  $UPLOAD_BUNDLE_ID"
+          echo "  Upload Version:    $UPLOAD_SHORT_VERSION"
+          echo "  Upload Build:      $UPLOAD_BUILD_NUMBER"
+          
+          if [ "$UPLOAD_BUNDLE_ID" != "com.jobhunterr.jobhunterr20" ]; then
+            echo "::error ::Pre-upload validation failed: Bundle ID '$UPLOAD_BUNDLE_ID' != 'com.jobhunterr.jobhunterr20'"
+            exit 1
+          fi
+          if [ "$UPLOAD_SHORT_VERSION" != "1.1" ]; then
+            echo "::error ::Pre-upload validation failed: Marketing version '$UPLOAD_SHORT_VERSION' != '1.1'"
+            exit 1
+          fi
+          if [ "$UPLOAD_BUILD_NUMBER" != "10" ]; then
+            echo "::error ::Pre-upload validation failed: Build number '$UPLOAD_BUILD_NUMBER' != '10'"
+            exit 1
+          fi
+          echo "Pre-upload validation PASSED. Proceeding with packaging..."
           
           rm -f "$IPA_FILE"
           (cd "$PATCH_DIR" && zip -qr "$IPA_FILE" Payload)
