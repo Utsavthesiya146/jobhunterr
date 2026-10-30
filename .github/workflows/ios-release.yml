@@ -248,51 +248,13 @@ jobs:
           IPA_FILE=$(find build/Export -name "*.ipa" | head -n 1)
           echo "Uploading $IPA_FILE to TestFlight..."
           
-          if xcrun --find altool &>/dev/null; then
-            echo "Uploading using xcrun altool..."
-            xcrun altool --upload-app \
-                         --type ios \
-                         --file "$IPA_FILE" \
-                         --apiKey "$ASC_KEY_ID" \
-                         --apiIssuer "$ASC_ISSUER" \
-                         --show-progress
-          else
-            echo "altool not found, uploading using xcodebuild..."
-            cat <<EOF > build/UploadExportOptions.plist
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-                <key>destination</key>
-                <string>upload</string>
-                <key>method</key>
-                <string>app-store</string>
-                <key>signingStyle</key>
-                <string>manual</string>
-                <key>signingCertificate</key>
-                <string>Apple Distribution</string>
-                <key>provisioningProfiles</key>
-                <dict>
-                    <key>com.jobhunterr.jobhunterr20</key>
-                    <string>JobHunterr_AppStore</string>
-                </dict>
-                <key>teamID</key>
-                <string>${{ secrets.APPLE_TEAM_ID }}</string>
-                <key>uploadSymbols</key>
-                <true/>
-                <key>manageAppVersionAndBuildNumber</key>
-                <true/>
-            </dict>
-            </plist>
-            EOF
-            xcodebuild -exportArchive \
-                       -archivePath build/Release/Jobhunterr.xcarchive \
-                       -exportOptionsPlist build/UploadExportOptions.plist \
-                       -allowProvisioningUpdates \
-                       -authenticationKeyPath "$AUTH_KEY_PATH" \
-                       -authenticationKeyID "$ASC_KEY_ID" \
-                       -authenticationKeyIssuerID "$ASC_ISSUER"
-          fi
+          xcrun altool --upload-app \
+                       --type ios \
+                       --file "$IPA_FILE" \
+                       --apiKey "$ASC_KEY_ID" \
+                       --apiIssuer "$ASC_ISSUER" \
+                       --show-progress
+          
           echo "TestFlight upload step completed."
 
       - name: Clean Temporary Keychain and Credentials
